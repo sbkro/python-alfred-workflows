@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from workflows.commons.xml_tree import Element
+from .commons.xml_tree import Element
 
 
 class Title(Element):
