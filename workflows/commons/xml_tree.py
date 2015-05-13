@@ -3,6 +3,7 @@ import xml.etree.ElementTree as etree
 
 
 def getter(attr):
+    '''getter method'''
     def _getter(self):
         return getattr(self, '__{0}'.format(attr))
 
@@ -10,6 +11,7 @@ def getter(attr):
 
 
 def setter(attr):
+    '''setter method'''
     def _setter(self, val):
         setattr(self, '__{0}'.format(attr), val)
 
@@ -37,11 +39,45 @@ class ElementMeta(type):
 
 
 class Element(object):
+    '''
+    Base class of XML Element.
+    You can generate a xml tree object by extending this class and
+    defining the parameters. In detail, refer to follow samples.
+
+    Definition examples. ::
+        class Author(Element):
+            __element_name__ = 'author'
+
+        class Book(Element):
+            __element_name__ = 'book'
+            __attributes__ = ['name', 'price']
+            __sub_element__ = [Author]
+
+    Code examples. ::
+        import Author, Book
+
+        # argument is used as text node content,
+        # keyword arguments is used as attributes.
+        book = Book(name='learning python', price='3000')
+        book.append(Author('aaaa'))
+
+        # create xml object. result as follows.
+        #
+        # <book name='learning python' price='300'>
+        #    <author>aaa</author>
+        # </book>
+        book.build()
+    '''
+
     __metaclass__ = ElementMeta
 
-    # TODO: comment
+    ''' Define element name (Required / str) '''
     __element_name__ = ''
+
+    ''' Define attribute names (Option / list of str) '''
     __attributes__ = []
+
+    ''' Define sub element classes (Option / list of Element) '''
     __sub_elements__ = []
 
     def __init__(self, text=None, **kwargs):
@@ -60,18 +96,40 @@ class Element(object):
 
     @property
     def attributes(self):
+        '''
+        Return attributes as dict.
+
+        :returns: attributes
+        '''
         return {a: getattr(self, a) for a in self.__attributes__
                 if getattr(self, a) is not None}
 
     @property
     def sub_elements(self):
+        '''
+        Return sub element.
+
+        :returns: sub element.
+        '''
         return self._sub_elements
 
     @property
     def text(self):
+        '''
+        Return text.
+
+        :returns: text content.
+        '''
         return self._text
 
     def append(self, e):
+        '''
+        Append child element.
+
+        :param e: child element which append on self.
+        :returns: self.
+        :raises TypeError: e is invalid.
+        '''
         if not isinstance(e, tuple(self.__sub_elements__)):
             raise TypeError()
 
@@ -80,6 +138,17 @@ class Element(object):
         return self
 
     def build(self, parent=None):
+        '''
+        Convert to xml tree from instance variable of element. And return it.
+
+        :param parent:
+            parent element.
+
+            If parent is None, this element build as root node.
+            If parent is not None, this element build as child of
+            specified element.
+        :returns: xml tree
+        '''
         if parent is None:
             e = etree.Element(self.__element_name__, attrib=self.attributes)
         else:
