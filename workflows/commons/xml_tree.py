@@ -21,16 +21,26 @@ def setter(attr):
 class ElementMeta(type):
     def __new__(cls, cls_name, cls_bases, cls_dict):
         if not isinstance(cls_dict.get('__element_name__'), str):
-            raise ValueError()
+            raise ValueError(
+                '__element_name__ must define str. : {0}'.
+                format(cls_dict.get('__element_name__').__class__.__name__)
+            )
 
         for se in cls_dict.get('__sub_elements__', []):
             if not isinstance(se, ElementMeta):
-                raise ValueError()
+                raise ValueError(
+                    'value of __sub_elements__ must define ' +
+                    'sub class of Element. : {0}'.
+                    format(se.__class__.__name__)
+                )
 
         # generate getter/setter
         for attr in cls_dict.get('__attributes__', []):
             if not isinstance(attr, str):
-                raise ValueError()
+                raise ValueError(
+                    'value of __attributes__ must define str. : {0}'.
+                    format(attr.__class__.__name__)
+                )
 
             if attr not in cls_dict.keys():
                 cls_dict[attr] = property(getter(attr), setter(attr))
@@ -131,7 +141,13 @@ class Element(object):
         :raises TypeError: e is invalid.
         '''
         if not isinstance(e, tuple(self.__sub_elements__)):
-            raise TypeError()
+            raise TypeError(
+                'element must be {0}. : {1}'.
+                format(
+                    [i.__name__ for i in tuple(self.__sub_elements__)],
+                    e.__class__.__name__
+                )
+            )
 
         self._sub_elements.append(e)
 

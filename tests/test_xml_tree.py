@@ -19,24 +19,25 @@ def test_metaclass():
     with assert_raises(ValueError) as e:
         class ElementNameNotString(Element):
             __element_name__ = 100
-    eq_('', str(e.exception))
+    eq_('__element_name__ must define str. : int', str(e.exception))
 
     with assert_raises(ValueError) as e:
         class ElementNameNotDefined(Element):
             pass
-    eq_('', str(e.exception))
+    eq_('__element_name__ must define str. : NoneType', str(e.exception))
 
     with assert_raises(ValueError) as e:
         class SubElementNotElement(Element):
             __element_name__ = 'tag'
             __sub_elements__ = ['dummy']
-    eq_('', str(e.exception))
+    eq_('value of __sub_elements__ must define sub class of Element. : str',
+        str(e.exception))
 
     with assert_raises(ValueError) as e:
         class AttributeNotString(Element):
             __element_name__ = 'tag'
             __attributes__ = [100]
-    eq_('', str(e.exception))
+    eq_('value of __attributes__ must define str. : int', str(e.exception))
 
 
 def test_overwrite_property():
@@ -85,12 +86,19 @@ def test_append_with_invalid_node():
     item = Item()
     with assert_raises(TypeError) as e:
         item.append('dummy')
-        eq_('', str(e.exception))
+    eq_('element must be [\'SubItem\']. : str', str(e.exception))
 
     sub_item = SubItem()
     with assert_raises(TypeError) as e:
         sub_item.append(SubItem())
-        eq_('', str(e.exception))
+    eq_('element must be []. : SubItem', str(e.exception))
+
+    class DummyElement(Element):
+        __element_name__ = 'dummy'
+
+    with assert_raises(TypeError) as e:
+        item.append(DummyElement())
+    eq_('element must be [\'SubItem\']. : DummyElement', str(e.exception))
 
 
 def test_depth_0():
