@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import uuid
 from .commons.xml_tree import Element
 
 '''
@@ -51,6 +52,19 @@ class SubTitle(Element):
     __element_name__ = 'subtitle'
     __attributes__ = ['mod']
 
+    _mod_defs = ['shift', 'fn', 'ctrl', 'alt', 'cmd', None]
+
+    @property
+    def mod(self):
+        return self.__mod
+
+    @mod.setter
+    def mod(self, mod):
+        if mod not in self._mod_defs:
+            raise ValueError('mod must be {0}'.format(self._mod_defs))
+
+        self.__mod = mod
+
 
 class Icon(Element):
     '''
@@ -58,6 +72,19 @@ class Icon(Element):
     '''
     __element_name__ = 'icon'
     __attributes__ = ['type']
+
+    _type_defs = ['fileicon', 'filetype', None]
+
+    @property
+    def type(self):
+        return self.__type
+
+    @type.setter
+    def type(self, type):
+        if type not in self._type_defs:
+            raise ValueError('type must be {0}'.format(self._type_defs))
+
+        self.__type = type
 
 
 class Text(Element):
@@ -67,6 +94,19 @@ class Text(Element):
     __element_name__ = 'text'
     __attributes__ = ['type']
 
+    _type_defs = ['copy', 'largetype', None]
+
+    @property
+    def type(self):
+        return self.__type
+
+    @type.setter
+    def type(self, type):
+        if type not in self._type_defs:
+            raise ValueError('type must be {0}'.format(self._type_defs))
+
+        self.__type = type
+
 
 class Item(Element):
     '''
@@ -75,6 +115,35 @@ class Item(Element):
     __element_name__ = 'item'
     __attributes__ = ['uid', 'arg', 'valid', 'autocomplete', 'type']
     __sub_elements__ = [Title, SubTitle, Icon, Text]
+
+    _valid_defs = [True, False, None]
+
+    @property
+    def uid(self):
+        return self.__uid
+
+    @uid.setter
+    def uid(self, uid):
+        if uid:
+            self.__uid = uid
+        else:
+            self.__uid = str(uuid.uuid1())
+
+    @property
+    def valid(self):
+        return self.__valid
+
+    @valid.setter
+    def valid(self, valid):
+        if valid not in self._valid_defs:
+            raise ValueError('valid must be {0}'.format(self._valid_defs))
+
+        if valid is True:
+            self.__valid = 'YES'
+        elif valid is False:
+            self.__valid = 'no'
+        else:
+            self.__valid = None
 
 
 class Items(Element):

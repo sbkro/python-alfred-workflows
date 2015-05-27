@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import xml.etree.ElementTree as etree
-from nose.tools import eq_
+from nose.tools import eq_, ok_, assert_raises
 from workflows.script_filter import Items, Item, Title, SubTitle, Icon, Text
 
 
@@ -18,15 +18,14 @@ def assert_xml(expect, actual):
 def test_script_xml_filter_format():
     root = Items()
 
-    # TODO: valid
-    i1 = Item(uid='desktop', arg='~/Desktop', valid='YES',
+    i1 = Item(uid='desktop', arg='~/Desktop', valid=True,
               autocomplete='Desktop', type='file')
     i1.append(Title('Desktop'))
     i1.append(SubTitle('~/Desktop'))
     i1.append(Icon('~/Desktop', type='fileicon'))
     root.append(i1)
 
-    i2 = Item(uid='flickr', valid='no', autocomplete='flickr')
+    i2 = Item(uid='flickr', valid=False, autocomplete='flickr')
     i2.append(Title('Flickr'))
     i2.append(Icon('flickr.png'))
     root.append(i2)
@@ -37,7 +36,7 @@ def test_script_xml_filter_format():
     i3.append(Icon('public.jpeg', type='filetype'))
     root.append(i3)
 
-    i4 = Item(uid='home', arg="~/", valid="YES", autocomplete='Home',
+    i4 = Item(uid='home', arg="~/", valid=True, autocomplete='Home',
               type='file')
     i4.append(Title('Home Folder'))
     i4.append(Icon('~/', type='fileicon'))
@@ -57,6 +56,23 @@ def test_script_xml_filter_format():
     )
 
     assert_xml(a.getroot(), root.build())
+
+
+def test_item():
+    item = Item('root')
+
+    eq_(None, item.valid)
+    ok_(isinstance(item.uid, basestring))
+
+    item.valid = True
+    eq_('YES', item.valid)
+
+    item.valid = False
+    eq_('no', item.valid)
+
+    with assert_raises(ValueError) as e:
+        item.valid = 'dummy'
+    eq_('valid must be [True, False, None]', str(e.exception))
 
 
 def test_subtitle():
@@ -102,6 +118,13 @@ def test_subtitle():
     eq_('<root><subtitle mod="cmd">subtitle_text</subtitle></root>',
         etree.tostring(root))
 
+    # error
+    with assert_raises(ValueError) as ve:
+        e = SubTitle('root')
+        e.mod = 'dummy'
+    eq_("mod must be ['shift', 'fn', 'ctrl', 'alt', 'cmd', None]",
+        str(ve.exception))
+
 
 def test_icon():
     # not attribute
@@ -124,6 +147,12 @@ def test_icon():
     eq_('<root><icon type="filetype">icon_text</icon></root>',
         etree.tostring(root))
 
+    # error
+    with assert_raises(ValueError) as ve:
+        e = Icon('root')
+        e.type = 'dummy'
+    eq_("type must be ['fileicon', 'filetype', None]", str(ve.exception))
+
 
 def test_text():
     # copy
@@ -138,3 +167,9 @@ def test_text():
     e.build(root)
     eq_('<root><text type="largetype">text</text></root>',
         etree.tostring(root))
+
+    # error
+    with assert_raises(ValueError) as ve:
+        e = Text('text')
+        e.type = 'dummy'
+    eq_("type must be ['copy', 'largetype', None]", str(ve.exception))
