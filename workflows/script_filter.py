@@ -152,3 +152,78 @@ class Items(Element):
     '''
     __element_name__ = 'items'
     __sub_elements__ = [Item]
+
+
+class ScriptFilterManager(object):
+    def __init__(self):
+        self._items = Items()
+
+    def tostring(self):
+        import xml.etree.ElementTree as etree
+        return etree.tostring(self._items.build())
+
+    def append_item(self, title, icon_path,
+                    subtitle=None, uid=None, arg=None, valid=None,
+                    autocomplete=None, item_type=None, icon_type=None):
+        item_attrs = {
+            'uid': uid,
+            'arg': arg,
+            'valid': valid,
+            'autocomplete': autocomplete,
+            'type': item_type
+        }
+
+        icon_attrs = {
+            'type': icon_type
+        }
+
+        i = Item(**item_attrs)
+        i.append(Title(title))
+
+        if subtitle is not None:
+            i.append(SubTitle(subtitle))
+
+        i.append(Icon(icon_path, **icon_attrs))
+
+        self._items.append(i)
+
+    def append_subtitle(self, index, subtitle,
+                        shift=None, fn=None, ctrl=None, alt=None, cmd=None):
+        i = self._items.sub_elements[index]
+
+        if SubTitle in i.sub_elements:
+            raise ValueError('Subtitle element exist.')
+
+        if subtitle is not None:
+            i.append(SubTitle(subtitle))
+        if shift is not None:
+            i.append(SubTitle(shift, mod='shift'))
+        if fn is not None:
+            i.append(SubTitle(fn, mod='fn'))
+        if ctrl is not None:
+            i.append(SubTitle(ctrl, mod='ctrl'))
+        if alt is not None:
+            i.append(SubTitle(alt, mod='alt'))
+        if cmd is not None:
+            i.append(SubTitle(cmd, mod='cmd'))
+
+    def append_icon(self, index, path, filetype=False):
+        item = self._items.sub_elements[index]
+
+        if Icon in item.sub_elements:
+            raise ValueError('Icon element exist.')
+
+        icon_attrs = {'type': 'fileicon'} if filetype is True else {}
+        item.append(Icon(path, **icon_attrs))
+
+    def append_text(self, index, copy=None, largetype=None):
+        item = self._items.sub_elements[index]
+
+        if Text in item.sub_elements:
+            raise ValueError('Text element exist.')
+
+        if copy is not None:
+            item.append(Text(copy, type='copy'))
+
+        if largetype is not None:
+            item.append(Text(largetype, type='largetype'))

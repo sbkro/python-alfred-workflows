@@ -2,7 +2,9 @@
 import os
 import xml.etree.ElementTree as etree
 from nose.tools import eq_, ok_, assert_raises
-from workflows.script_filter import Items, Item, Title, SubTitle, Icon, Text
+from workflows.script_filter import (
+    Items, Item, Title, SubTitle, Icon, Text, ScriptFilterManager
+)
 
 
 def assert_xml(expect, actual):
@@ -56,6 +58,39 @@ def test_script_xml_filter_format():
     )
 
     assert_xml(a.getroot(), root.build())
+
+
+def test_script_xml_filter_format_with_manager():
+    manager = ScriptFilterManager()
+
+    manager.append_item('Desktop', '~/Desktop', subtitle='~/Desktop',
+                        uid='desktop', arg='~/Desktop', item_type='file',
+                        valid=True, autocomplete='Desktop',
+                        icon_type='fileicon')
+    manager.append_item('Flickr', 'flickr.png', uid='flickr',
+                        valid=False, autocomplete='flickr')
+    manager.append_item('My holiday photo', 'public.jpeg',
+                        subtitle='~/Pictures/My holiday photo.jpg',
+                        uid='image', autocomplete='My holiday photo',
+                        item_type='file', icon_type='filetype')
+    manager.append_item('Home Folder', '~/', uid='home', arg='~/', valid=True,
+                        autocomplete='Home', item_type='file',
+                        icon_type='fileicon')
+    manager.append_subtitle(3, 'Home folder ~/',
+                            shift='Subtext when shift is pressed',
+                            fn='Subtext when fn is pressed',
+                            ctrl='Subtext when ctrl is pressed',
+                            alt='Subtext when alt is pressed',
+                            cmd='Subtext when cmd is pressed')
+    manager.append_text(3, copy='Text when copying',
+                        largetype='Text for LargeType')
+
+    a = etree.parse(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                     'data', 'script_filter_xml_format.xml')
+    )
+
+    assert_xml(a.getroot(), manager._items.build())
 
 
 def test_item():
