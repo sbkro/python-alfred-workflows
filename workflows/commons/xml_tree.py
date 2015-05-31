@@ -109,7 +109,8 @@ class Element(object):
         '''
         Return attributes as dict.
 
-        :returns: attributes
+        Returns:
+            dict: attributes
         '''
         return {a: getattr(self, a) for a in self.__attributes__
                 if getattr(self, a) is not None}
@@ -119,7 +120,8 @@ class Element(object):
         '''
         Return sub element.
 
-        :returns: sub element.
+        Returns:
+            list of Element: sub element.
         '''
         return self._sub_elements
 
@@ -128,7 +130,8 @@ class Element(object):
         '''
         Return text.
 
-        :returns: text content.
+        Retuns:
+            str: text content.
         '''
         return self._text
 
@@ -136,9 +139,15 @@ class Element(object):
         '''
         Append child element.
 
-        :param e: child element which append on self.
-        :returns: self.
-        :raises TypeError: e is invalid.
+        Args:
+            e (Element): child element which append on self.
+
+        Returns:
+            Element: self
+
+        Raises:
+            TypeError: If datatype of argument **e** is not defined
+                       in __sub_elements__.
         '''
         if not isinstance(e, tuple(self.__sub_elements__)):
             raise TypeError(
@@ -157,13 +166,12 @@ class Element(object):
         '''
         Convert to xml tree from instance variable of element. And return it.
 
-        :param parent:
-            parent element.
+        Args:
+            parent (Element, optional):
+                Parent element. If it is None, self element is root element.
 
-            If parent is None, this element build as root node.
-            If parent is not None, this element build as child of
-            specified element.
-        :returns: xml tree
+        Returns:
+            xml.etree.ElementTree: xml tree object.
         '''
         if parent is None:
             e = etree.Element(self.__element_name__, attrib=self.attributes)
