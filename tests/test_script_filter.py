@@ -64,7 +64,7 @@ def test_script_xml_filter_format_with_manager():
     manager = ScriptFilterManager()
 
     manager.append_item('Desktop', '~/Desktop', subtitle='~/Desktop',
-                        uid='desktop', arg='~/Desktop', item_type='file',
+                        uid='desktop', arg='~/Desktop', is_file=True,
                         valid=True, autocomplete='Desktop',
                         icon_type='fileicon')
     manager.append_item('Flickr', 'flickr.png', uid='flickr',
@@ -72,9 +72,9 @@ def test_script_xml_filter_format_with_manager():
     manager.append_item('My holiday photo', 'public.jpeg',
                         subtitle='~/Pictures/My holiday photo.jpg',
                         uid='image', autocomplete='My holiday photo',
-                        item_type='file', icon_type='filetype')
+                        is_file=True, icon_type='filetype')
     manager.append_item('Home Folder', '~/', uid='home', arg='~/', valid=True,
-                        autocomplete='Home', item_type='file',
+                        autocomplete='Home', is_file=True,
                         icon_type='fileicon')
     manager.append_subtitle(3, 'Home folder ~/',
                             shift='Subtext when shift is pressed',

@@ -2,53 +2,14 @@
 import uuid
 from .commons.xml_tree import Element
 
-'''
-This module is utilities of Script Filter.
-By using it, the follwing functions are provided.
-
-    * data structure for Script Filter. and convert to XML from it.
-
-About Script Filter, refer to **Script Filter XML format ** workflows
-from Alfred Preferences.
-
-Code examples ::
-    items = Items()
-
-    i = Item(uid='desktop', arg='~/Desktop', valid='YES',
-             autocomplate='Desktop', type='file')
-    i.append(Title('Desktop'))
-    i.append(SubTitle('~/Desktop'))
-    i.append(Icon('~/Desktop', type='fileicon'))
-
-    items.append(i)
-
-    import xml.etree.ElementTree as etree
-    print etree.tostring(items.build())
-
-    # display follows xml.
-    #
-    # <items>
-    #     <item uid="desktop" arg="~/Desktop" valid="YES"
-    #      autocomplate="Desktop" type="file">
-    #         <title>Desktop</title>
-    #         <subtitle>~/Desktop</subtitle>
-    #         <icon type="fileicon">~/Desktop</title>
-    #     </item>
-    # </items>
-'''
-
 
 class Title(Element):
-    '''
-    Title element. This element is child node of **Item**.
-    '''
+    '''Title element. This element is child node of **Item**.'''
     __element_name__ = 'title'
 
 
 class SubTitle(Element):
-    '''
-    Subtitle element. This element is child node of **Item**.
-    '''
+    '''Subtitle element. This element is child node of **Item**.'''
     __element_name__ = 'subtitle'
     __attributes__ = ['mod']
 
@@ -67,9 +28,7 @@ class SubTitle(Element):
 
 
 class Icon(Element):
-    '''
-    Icon element. This element is child node of **Item**.
-    '''
+    '''Icon element. This element is child node of **Item**.'''
     __element_name__ = 'icon'
     __attributes__ = ['type']
 
@@ -88,9 +47,7 @@ class Icon(Element):
 
 
 class Text(Element):
-    '''
-    Text element. This element is child node of **Item**.
-    '''
+    '''Text element. This element is child node of **Item**.'''
     __element_name__ = 'text'
     __attributes__ = ['type']
 
@@ -109,9 +66,7 @@ class Text(Element):
 
 
 class Item(Element):
-    '''
-    Item element. This element is child node of **Items**.
-    '''
+    '''Item element. This element is child node of **Items**.'''
     __element_name__ = 'item'
     __attributes__ = ['uid', 'arg', 'valid', 'autocomplete', 'type']
     __sub_elements__ = [Title, SubTitle, Icon, Text]
@@ -147,30 +102,96 @@ class Item(Element):
 
 
 class Items(Element):
-    '''
-    Items element. This element is root node.
-    '''
+    '''Items element. This element is root node.'''
     __element_name__ = 'items'
     __sub_elements__ = [Item]
 
 
 class ScriptFilterManager(object):
+    '''
+    This is an utility class for script filter.
+    You can create script filter xml easily using following method.
+
+    1. Create object.
+
+        Examples:
+
+            manager = ScriptFilterManager()
+
+    2. Append result item.
+       One item corresponds to the Alfred's results of the one line.
+
+       This class provide two type APIs.
+       One is basic method. Create a new result item.
+       Other is extension method. Add information to specified result.
+
+        Examples:
+
+            manager.append_item('Desktop', '~/Desktop',
+                                subtitle='~/Desktop',
+                                arg='~/Desktop', valid=True,
+                                autocomplate='Desktop', icon_type='fileicon'
+                                is_file=True)
+
+    3. Get script filter xml as string. And return stdout to Alfred.
+
+        Examples::
+
+            print manager.tostring()
+
+            # display follows xml.
+            #
+            # <items>
+            #     <item uid="desktop" arg="~/Desktop" valid="YES"
+            #      autocomplate="Desktop" type="file">
+            #         <title>Desktop</title>
+            #         <subtitle>~/Desktop</subtitle>
+            #         <icon type="fileicon">~/Desktop</title>
+            #     </item>
+            # </items>
+    '''
     def __init__(self):
         self._items = Items()
 
     def tostring(self):
+        '''
+        Return script filter xml as string.
+
+        Returns:
+            str: script filter.
+        '''
         import xml.etree.ElementTree as etree
         return etree.tostring(self._items.build())
 
-    def append_item(self, title, icon_path,
+    def append_item(self, title, icon_path_or_name,
                     subtitle=None, uid=None, arg=None, valid=None,
-                    autocomplete=None, item_type=None, icon_type=None):
+                    autocomplete=None, icon_type=None, is_file=False):
+        '''
+        Add Alfred's result item. This is a basic method API.
+
+        Args:
+            title (str): title text.
+            icon_path_or_name (str): icon path or name.
+            subtitle (str, optional): sub title text.
+            uid (str, optional): unique id of item
+            arg (str, optional): arg of item.
+            valid (bool, optional):
+                If valid is False, it won't be actioned.
+            autocomplete (str, optional):
+                If you select the item. this string is complemented in Alfred.
+            icon_type (str, optional):
+                Loading type of specified icon. Type is follows.
+
+                fileicon: load file type directory from icon path.
+                filetype: load file type from icon name.
+            is_file (bool, optional): item is treated as file.
+        '''
         item_attrs = {
             'uid': uid,
             'arg': arg,
             'valid': valid,
             'autocomplete': autocomplete,
-            'type': item_type
+            'type': 'file' if is_file else None
         }
 
         icon_attrs = {
@@ -183,12 +204,28 @@ class ScriptFilterManager(object):
         if subtitle is not None:
             i.append(SubTitle(subtitle))
 
-        i.append(Icon(icon_path, **icon_attrs))
+        i.append(Icon(icon_path_or_name, **icon_attrs))
 
         self._items.append(i)
 
     def append_subtitle(self, index, subtitle,
                         shift=None, fn=None, ctrl=None, alt=None, cmd=None):
+        '''
+        Add the sub title to an existing result item.
+        This is an extension method API.
+
+        Args:
+            index (int): item index.
+            subtitle (str): sub title text.
+            shift (str, optional): sub title text when shift is pressed.
+            fn (str, optional): sub title text when fn is pressed.
+            ctrl (str, optional): sub title text when ctrl is pressed.
+            alt (str, optional): sub title text when alt is pressed.
+            cmd (str, optional): sub title text when cmd is pressed.
+
+        Raises:
+            ValueError: If subtitle is added in specified item, already.
+        '''
         i = self._items.sub_elements[index]
 
         if SubTitle in i.sub_elements:
@@ -207,16 +244,19 @@ class ScriptFilterManager(object):
         if cmd is not None:
             i.append(SubTitle(cmd, mod='cmd'))
 
-    def append_icon(self, index, path, filetype=False):
-        item = self._items.sub_elements[index]
-
-        if Icon in item.sub_elements:
-            raise ValueError('Icon element exist.')
-
-        icon_attrs = {'type': 'fileicon'} if filetype is True else {}
-        item.append(Icon(path, **icon_attrs))
-
     def append_text(self, index, copy=None, largetype=None):
+        '''
+        Add the text infromation to an existing result item.
+        This is an extension method API.
+
+        Args:
+            index (int): item index.
+            copy (str, optional): text when coping.
+            largetype (str, optional): text for LargeType.
+
+        Raises:
+            ValueError: If text is added in specified item, already.
+        '''
         item = self._items.sub_elements[index]
 
         if Text in item.sub_elements:
