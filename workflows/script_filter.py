@@ -178,7 +178,7 @@ class ScriptFilterManager(object):
             valid (bool, optional):
                 If valid is False, it won't be actioned.
             autocomplete (str, optional):
-                If you select the item. this string is complemented in Alfred.
+                If you select the item, this string is complemented in Alfred.
             icon_type (str, optional):
                 Loading type of specified icon. Type is follows.
 
