@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>jp.sbkro.date</string>
+	<key>connections</key>
+	<dict/>
+	<key>createdby</key>
+	<string>sbkro</string>
+	<key>description</key>
+	<string>display current date at Alfred's prompt.</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Alfred Date</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>escaping</key>
+				<integer>126</integer>
+				<key>keyword</key>
+				<string>date</string>
+				<key>script</key>
+				<string># -*- coding:utf-8 -*-
+
+from date.command import DateCommand
+
+# config
+config = {
+    'format': '%Y/%m/%d (%a) %H:%M:%S'
+}
+
+# get script filer xml (don't edit)
+command = DateCommand(config)
+print command.execute()
+</string>
+				<key>subtext</key>
+				<string>display current date at Alfred's prompt.</string>
+				<key>title</key>
+				<string>Alfred Calendar</string>
+				<key>type</key>
+				<integer>3</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>279D82C3-28A0-4B76-8876-5629E8A8CF69</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>279D82C3-28A0-4B76-8876-5629E8A8CF69</key>
+		<dict>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>sbkro.github.io</string>
+</dict>
+</plist>
