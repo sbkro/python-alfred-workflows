@@ -1,4 +1,6 @@
 # python-alfred-workflow
+[![Build Status](https://travis-ci.org/sbkro/python-alfred-workflows.svg?branch=develop)](https://travis-ci.org/sbkro/python-alfred-workflows)
+
 This application is an utility for making a *Alfred workflows* plugin. You can create a workflows using Python.
 
 *Alfred* is a Macintosh application. In detail ,refer to follows Web site.
